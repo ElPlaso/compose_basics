@@ -15,4 +15,5 @@
     <string name="row_content">A layout composable that places its children in a horizontal sequence.</string>
     <string name="column_title">Column composable</string>
     <string name="column_content">A layout composable that places its children in a vertical sequence.</string>
+    <string name="roll_label">Roll</string>
 </resources>
