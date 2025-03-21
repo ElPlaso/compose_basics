@@ -5,11 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,9 +17,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,11 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    DiceRoller(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .wrapContentSize(Alignment.Center)
-                    )
+                    LemonadeMaker()
                 }
             }
         }
@@ -228,7 +225,7 @@ fun DiceRoller(modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = image,
-            contentDescription = "1",
+            contentDescription = result.toString(),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { result = (1..6).random() }) {
@@ -239,14 +236,105 @@ fun DiceRoller(modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun ImageButton(
+    modifier: Modifier = Modifier,
+    image: Painter,
+    contentDescription: String,
+    onClick: () -> Unit,
+    bgColor: Color
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.padding(paddingValues = PaddingValues(all = 4.dp)),
+        shape = RoundedCornerShape(size = 16.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = bgColor)
+
+    ) {
+        Image(
+            painter = image,
+            contentDescription = contentDescription,
+        )
+    }
+}
+
+@Composable
+fun LemonadeMaker(modifier: Modifier = Modifier) {
+    var stage by remember { mutableStateOf(1) }
+
+    val imageResource = when (stage) {
+        1 -> R.drawable.lemon_tree
+        2 -> R.drawable.lemon_squeeze
+        3 -> R.drawable.lemon_drink
+        else -> R.drawable.lemon_restart
+    }
+
+    val contentDescription = when (stage) {
+        1 -> stringResource(R.string.lemon_tree_description)
+        2 -> stringResource(R.string.lemon_description)
+        3 -> stringResource(R.string.lemon_glass_description)
+        else -> stringResource(R.string.lemon_empty_description)
+    }
+
+    val instruction = when (stage) {
+        1 -> stringResource(R.string.lemon_tree_instruction)
+        2 -> stringResource(R.string.lemon_instruction)
+        3 -> stringResource(R.string.lemon_glass_instruction)
+        else -> stringResource(R.string.lemon_restart_instruction)
+    }
+
+    var squeezeCount = 0;
+    var targetSqueezeCount = (2..4).random()
+
+    val handleClick: () -> Unit = {
+        if (stage == 1 || stage == 3) {
+            stage++
+        } else if (stage == 2) {
+            squeezeCount++
+            if (squeezeCount == targetSqueezeCount) {
+                stage++
+            }
+        } else {
+            stage = 1
+            squeezeCount = 0;
+            targetSqueezeCount = (2..4).random()
+        }
+
+    }
+
+    Column() {
+        Text(
+            text = "Lemonade",
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            modifier = Modifier
+                .background(color = Color.Yellow)
+                .fillMaxWidth()
+                .padding(paddingValues = PaddingValues(all = 16.dp))
+        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            ImageButton(
+                image = painterResource(imageResource),
+                contentDescription = contentDescription,
+                onClick = handleClick,
+                bgColor = Color.Cyan
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(instruction, fontSize = 18.sp)
+        }
+    }
+
+}
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     CardAppTheme {
-        DiceRoller(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center)
-        )
+        LemonadeMaker()
     }
 }
